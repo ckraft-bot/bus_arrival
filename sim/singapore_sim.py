@@ -12,11 +12,10 @@ load_dotenv()
 WIDTH = 800
 HEIGHT = 480
 
-
-def get_bus_arrival(api_key, bus_stop_code):
+def get_bus_arrival(LTA_API_KEY, bus_stop_code):
     url = f"https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?BusStopCode={bus_stop_code}"
     headers = {
-        "AccountKey": api_key,
+        "AccountKey": LTA_API_KEY,
         "accept": "application/json"
     }
 
@@ -52,7 +51,6 @@ def draw_bus_screen(bus_info_A, bus_info_B):
     # font = ImageFont.truetype("OpenSans-Bold.ttf", 32) # doesnt exist
     font = ImageFont.truetype("arialbd.ttf", 32)
 
-
     y = 20
     col_offset = WIDTH // 2
 
@@ -75,7 +73,6 @@ def draw_bus_screen(bus_info_A, bus_info_B):
 
     return img
 
-
 # -----------------------------
 # Streamlit UI
 # -----------------------------
@@ -83,7 +80,7 @@ st.set_page_config(layout="centered")
 
 st.title("Bus Arrival Simulator")
 
-API_KEY = os.getenv("API_KEY")
+LTA_API_KEY = os.getenv("LTA_API_KEY")
 STOP_A = os.getenv("BUS_STOP_CODE_A")
 STOP_B = os.getenv("BUS_STOP_CODE_B")
 
@@ -92,8 +89,8 @@ refresh_rate = st.sidebar.slider("Refresh Interval (seconds)", 10, 120, 30)
 placeholder = st.empty()
 
 while True:
-    A = get_bus_arrival(API_KEY, STOP_A)
-    B = get_bus_arrival(API_KEY, STOP_B)
+    A = get_bus_arrival(LTA_API_KEY, STOP_A)
+    B = get_bus_arrival(LTA_API_KEY, STOP_B)
 
     screen = draw_bus_screen(A, B)
 
