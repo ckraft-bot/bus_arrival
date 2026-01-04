@@ -1,120 +1,266 @@
-# E-Ink Bus Picture Frame
-![Bus Timing E-ink Display](https://drive.usercontent.google.com/download?id=1zQvAToLZ3Cnxs84Y6a4Uk20vn-1cJqk0)
+# SL Bus Arrival Display
 
-Living in Singapore, I'm truly blessed having access to public transportation that is cheap, 'reliable' and consistent. As much as most of us would complain about it everyday, it is a constant necessity that most of us take for granted. 
+A real-time public transport departure board for Stockholm's SL network, inspired by the [Singapore bus_arrival project](https://github.com/awesomelionel/singapore-bus-timing-edisplay).
 
-Based on the idea from [Weatherman Dashboard for ESPHome](https://community.home-assistant.io/t/use-esphome-with-e-ink-displays-to-blend-in-with-your-home-decor/435428), I wanted to make something similar but using a Raspberry Pi Zero with a Waveshare 7.5inch E-Ink display.
+This project displays real-time departure information from SL (Storstockholms Lokaltrafik) using Trafiklab's open APIs.
 
-This project creates an E-Ink display that shows real-time bus arrival times and train disruption information using data from Singapore's Land Transport Authority (LTA) DataMall API.
-Request for access here: [LTA DataMall](https://datamall.lta.gov.sg/content/datamall/en/request-for-api.html)
+## Features
 
-## Things you will need
-1. [Raspberry Pi Zero W](https://s.click.aliexpress.com/e/_oCx7W6d)
-2. [Waveshare 7.5inch E-Ink Display (EPD 7in5 V2)](https://s.click.aliexpress.com/e/_oCtHZjx) make sure you get the one with the HAT to connect to the Pi
-3. 40-pin GPIO headers for the Raspberry Pi Zero. I chose to solder it onto the board
-4. [3D Printed Case](https://www.thingiverse.com/thing:3996613) or an [IKEA Ribba 7x5 picture frame](https://shorturl.at/pmxf3)
-3. 5V 3A power supply
-4. [Micro USB flat cable](https://s.click.aliexpress.com/e/_oEFqXSD)
-5. 4GB or more SD card
+- 🚌 Real-time departure information for buses, metro, trains, trams, and ferries
+- 📍 Monitor multiple stops simultaneously  
+- ⏱️ Shows countdown timers (e.g., "5 min", "Nu")
+- ⚠️ Displays service disruptions and deviations
+- 🔄 Auto-refreshing display
+- 🆓 **No API key required** - uses SL's public Transport API
 
+## Requirements
 
-## Setup
+- Python 3.7+
+- Internet connection
 
-1. Clone this repository to your Raspberry Pi.
-2. Install the required packages:
+## Installation
+
+1. Clone this repository:
+   ```bash
+   git clone <your-repo-url>
+   cd bus_arrival_sl
    ```
+
+2. Install dependencies:
+   ```bash
    pip install -r requirements.txt
    ```
-3. Rename the `.env.example` file to `.env` in the project root
 
-4. Replace `your_lta_api_key` with your LTA DataMall API key, and `your_first_bus_stop_code` and `your_second_bus_stop_code` with the desired bus stop codes.
+3. Configure your sites (optional):
+   ```bash
+   cp .env.example .env
+   # Edit .env to set your preferred site IDs
    ```
-   API_KEY=your_lta_api_key //Get this from LTA DataMall
-   BUS_STOP_CODE_A=your_first_bus_stop_code
-   BUS_STOP_CODE_B=your_second_bus_stop_code
-   ```
+
+## Configuration
+
+The application can be configured via environment variables or a `.env` file:
+
+### Site IDs
+
+You need to find the Site IDs for your desired stops. 
+
+**Option 1: Browse the full list**
+Visit the SL sites endpoint: https://transport.integration.sl.se/v1/sites
+
+**Option 2: Common Stockholm sites**
+- 9192 = Slussen
+- 9001 = T-Centralen  
+- 1079 = Odenplan
+- 9180 = Kungsträdgården
+- 9189 = Fridhemsplan
+- 9193 = Gamla Stan
+
+### Environment Variables
+
+```bash
+# Site IDs to monitor (comma-separated)
+SITE_IDS=9193,9001
+# Refresh interval in seconds (default: 60)
+REFRESH_INTERVAL=60
+```
 
 ## Usage
 
-Run the main script: 
-```
+### Basic Usage
+
+```bash
 python3 app/main.py
 ```
 
-Alternatively, you can run the script automatically every time the system boots, you can set it up as a startup service using `systemd` on Linux-based systems, such as Raspberry Pi or Ubuntu. Here’s how you can do it:
+### With Custom Sites
 
+```bash
+# Set site IDs directly
+SITE_IDS=9193,9001 python3 app/main.py
 
-1. **Create a systemd service file**:
-   - Open a terminal.
-   - Use a text editor like `nano` to create a new service file:
+# Or use environment variables
+export SITE_IDS=9193,9001
+export REFRESH_INTERVAL=30
+python3 app/main.py
+```
 
-     ```bash
-     sudo nano /etc/systemd/system/bus_display.service
-     ```
+## Example Output
 
-2. **Add the following content to the service file**:
+```
+================================================================================
+SL AVGÅNGAR - 2025-01-04 14:30:00
+================================================================================
 
-    ```ini
-    [Unit]
-    Description=E-Ink Bus Display Service
-    After=multi-user.target
+📍 Slussen (Site ID: 9192)
+--------------------------------------------------------------------------------
+   🚇 Line   17 → Akalla                   3 min
+   🚇 Line   19 → Hagsätra                 5 min
+   🚌 Line   76 → Alvik                    7 min
+   🚌 Line    3 → Karolinska inst...      Nu
 
-    [Service]
-    ExecStart=/usr/bin/python3 /path/to/your/app/main.py
-    WorkingDirectory=/path/to/your/
-    StandardOutput=inherit
-    StandardError=inherit
-    Restart=always
-    User=pi
+   ⚠️  Deviations:
+      • Temporary speed restrictions on the green line
 
-    [Install]
-    WantedBy=multi-user.target
-    ```
+📍 T-Centralen (Site ID: 9001)
+--------------------------------------------------------------------------------
+   🚇 Line   17 → Akalla                   1 min
+   🚇 Line   18 → Alvik                    2 min
+   🚇 Line   19 → Hässelby strand          4 min
+```
 
-    - **ExecStart**: Replace `/path/to/your/script.py` with the full path to your Python script.
-    - **WorkingDirectory**: Replace `/path/to/your/` with the directory containing your script.
-    - **User**: Replace `pi` with the username under which the script should run, if different.
-    - `Restart=always` ensures that the service restarts if it fails.
+## API Information
 
-3. **Save and exit**:
-   - Press `Ctrl + X`, then `Y`, and then `Enter` to save and exit `nano`.
+This project uses the **SL Transport API** from Trafiklab, which provides:
 
-### Step 2: Enable the Service
+- Real-time departures and arrivals
+- Line information
+- Service disruptions
+- Stop locations
 
-1. **Reload systemd to recognize the new service**:
+### API Details
 
-    ```bash
-    sudo systemctl daemon-reload
-    ```
+- **No API key required** for the Transport API
+- Base URL: `https://transport.integration.sl.se/v1`
+- Documentation: https://www.trafiklab.se/api/our-apis/sl/transport/
 
-2. **Enable the service to start on boot**:
+### Key Concepts
 
-    ```bash
-    sudo systemctl enable bus_display.service
-    ```
+- **Site**: A grouping of stop areas (e.g., "T-Centralen")
+- **StopArea**: A grouping of stop points with same traffic type
+- **StopPoint**: A specific platform/quay where vehicles stop
 
-3. **Start the service immediately (optional)**:
+## Running as a Service
 
-    ```bash
-    sudo systemctl start bus_display.service
-    ```
+To run this automatically at startup on Linux systems:
 
-4. **Check the status of the service**:
+1. Create a systemd service file:
+   ```bash
+   sudo nano /etc/systemd/system/sl_display.service
+   ```
 
-    ```bash
-    sudo systemctl status bus_display.service
-    ```
+2. Add the following content:
+   ```ini
+   [Unit]
+   Description=SL Bus Arrival Display Service
+   After=multi-user.target
 
-    This command will show whether the service is active and running.
+   [Service]
+   ExecStart=/usr/bin/python3 /path/to/bus_arrival_sl/app/main.py
+   WorkingDirectory=/path/to/bus_arrival_sl/
+   StandardOutput=inherit
+   StandardError=inherit
+   Restart=always
+   User=pi
+   Environment="SITE_IDS=9193,9001"
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+3. Enable and start the service:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable sl_display.service
+   sudo systemctl start sl_display.service
+   sudo systemctl status sl_display.service
+   ```
+
+## E-Ink Display Integration
+
+This project is designed to work with e-ink displays similar to the original Singapore project. To integrate with a Waveshare e-ink display:
+
+1. Install the Waveshare e-Paper library:
+   ```bash
+   git clone https://github.com/waveshare/e-Paper.git
+   cp -r e-Paper/RaspberryPi_JetsonNano/python/lib/waveshare_epd lib/
+   ```
+
+2. Modify `app/main.py` to use the e-ink display instead of console output
+
+3. See the original [Singaporean bus arrival project](https://github.com/awesomelionel/singapore-bus-timing-edisplay) for e-ink display examples
+
+## Hardware Setup (Optional)
+
+For a physical departure board display:
+
+1. **Raspberry Pi Zero W** (or any Raspberry Pi)
+2. **Waveshare 7.5" e-Paper HAT** (or similar e-ink display)
+3. **5V 3A Power Supply**
+4. **Picture Frame** (IKEA Ribba or 3D-printed case)
+
+## Differences from Singapore Version
+
+This Swedish version differs from the original Singapore project:
+
+- ✅ **No API key needed** - SL Transport API is freely accessible
+- Uses SL's Transport API instead of Singapore's LTA DataMall
+- 🚇 Supports multiple transport modes (metro, bus, train, tram, ferry)
+- 📍 Uses Site IDs instead of bus stop codes
+- ⏱️ Real-time countdown in minutes
+- ⚠️ Displays service disruptions
+
+## API Rate Limiting
+
+The SL Transport API doesn't require an API key, but you should:
+
+- Not make excessive requests
+- Keep refresh intervals reasonable (30-60 seconds minimum)
+- Cache data when appropriate
+- Consider using GTFS Regional for bulk data needs
+
+## Troubleshooting
+
+### Site ID Not Found
+- Verify your site ID at https://transport.integration.sl.se/v1/sites
+- Make sure you're using the numeric ID (not the GID)
+
+### No Departures Shown
+- Check if the site has active service at the current time
+- Try increasing the forecast parameter (default is 30 minutes)
+- Verify your internet connection
+
+### Connection Errors
+- Check your internet connection
+- The API may be temporarily unavailable - check https://status.trafiklab.se
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+## Resources
+
+- [Trafiklab SL Transport API](https://www.trafiklab.se/api/our-apis/sl/transport/)
+- [Trafiklab Documentation](https://www.trafiklab.se/docs/)
+- [Original Singapore Project](https://github.com/awesomelionel/singapore-bus-timing-edisplay)
+- [SL Journey Planner](https://sl.se)
 
 ## License
 
 MIT License
 
-Copyright (c) 2024 Lionel Tan
+Copyright (c) 2025
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Acknowledgments
+
+- Inspired by [awesomelionel/singapore-bus-timing-edisplay](https://github.com/awesomelionel/singapore-bus-timing-edisplay)
+- Data provided by [Trafiklab](https://www.trafiklab.se/)
+- Transport services by [SL](https://sl.se)
