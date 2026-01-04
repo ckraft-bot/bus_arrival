@@ -89,28 +89,28 @@ python3 app/main.py
 
 ```
 ================================================================================
-SL BUSS AVGÅNGAR - 2026-01-04 17:18:55
+SL BUSS AVGÅNGAR - 2026-01-04 17:34:49
 ================================================================================
 
 📍 Slussen (Site ID: 9192)
 --------------------------------------------------------------------------------
-   🚌 Line  71T → Henriksdalsviadukten       357 min
-   🚌 Line    2 → Norrtull                   357 min
-   🚌 Line  444 → Västra Orminge             358 min
-   🚌 Line    3 → Södersjukhuset             358 min
-   🚌 Line   53 → Karolinska institutet      359 min
-   🚌 Line    3 → Karolinska sjukhuset       360 min
-   🚌 Line  402 → Nacka Forum                361 min
-   🚌 Line  414 → Orminge centrum            361 min
-   🚌 Line    2 → Sofia                      361 min
-   🚌 Line  474 → Hemmesta                   362 min
+   🚌 Line  71T → Henriksdalsviadukten            Nu
+   🚌 Line  410 → Ektorps centrum                 Nu
+   🚌 Line  444 → Västra Orminge               1 min
+   🚌 Line   57 → Hjorthagen                   1 min
+   🚌 Line   53 → Henriksdalsberget            2 min
+   🚌 Line  471 → Västra Orminge               3 min
+   🚌 Line   53 → Karolinska institutet        4 min
+   🚌 Line    2 → Sofia                        4 min
+   🚌 Line  422 → Gustavsberg Lugnet           5 min
+   🚌 Line  440 → Bullandö                     5 min
 
 📍 T-Centralen (Site ID: 9001)
 --------------------------------------------------------------------------------
-   🚌 Line   69 → Centralen                  363 min
-   🚌 Line   65 → Skeppsholmen               367 min
-   🚌 Line   65 → Hornsberg                  368 min
-   🚌 Line   69 → Djurgårdsbrunn             387 min
+   🚌 Line   65 → Skeppsholmen                    Nu
+   🚌 Line   69 → Djurgårdsbrunn              11 min
+   🚌 Line   69 → Centralen                   13 min
+   🚌 Line   65 → Hornsberg                   20 min
 
    ⚠️  Deviations:
       • Korta tåg. Gå mot mitten av plattformen.

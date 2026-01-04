@@ -14,6 +14,9 @@ from zoneinfo import ZoneInfo
 # Hard-lock timezone to Sweden
 SWEDEN_TZ = ZoneInfo("Europe/Stockholm")
 
+# Cutoff forecast
+MAX_MINUTES_AHEAD = 60
+
 
 class SLTransportAPI:
     """Handler for SL Transport API"""
@@ -57,34 +60,38 @@ class BusArrivalDisplay:
         self.api = SLTransportAPI()
         self.site_ids = site_ids
 
-    def format_time_display(self, scheduled: str, expected: str = None) -> str:
+    def format_time_display(self, scheduled: str, expected: str = None):
+        """
+        SL timestamps are inconsistent:
+        - Sometimes UTC (with Z)
+        - Sometimes local Stockholm time (no tzinfo)
+
+        This function handles both correctly.
+        """
         try:
-            target_time_str = expected if expected else scheduled
+            target_time_str = expected or scheduled
+            dt = datetime.fromisoformat(target_time_str.replace("Z", "+00:00"))
 
-            # API timestamps are UTC
-            target_time_utc = datetime.fromisoformat(
-                target_time_str.replace("Z", "+00:00")
-            )
+            # CRITICAL FIX:
+            # If no timezone info, assume Stockholm local time
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=SWEDEN_TZ)
+            else:
+                dt = dt.astimezone(SWEDEN_TZ)
 
-            # Convert to Sweden time
-            target_time = target_time_utc.astimezone(SWEDEN_TZ)
-
-            # Current Sweden time
-            now = datetime.now(SWEDEN_TZ)
-
-            diff = target_time - now
-            minutes = int(diff.total_seconds() / 60)
+            now_se = datetime.now(SWEDEN_TZ)
+            minutes = int((dt - now_se).total_seconds() // 60)
 
             if minutes <= 0:
-                return "Nu"
+                return "Nu", 0
             elif minutes == 1:
-                return "1 min"
+                return "1 min", 1
             else:
-                return f"{minutes} min"
+                return f"{minutes} min", minutes
 
         except Exception as e:
             print(f"Error formatting time: {e}")
-            return scheduled.split("T")[1][:5] if "T" in scheduled else scheduled
+            return "?", None
 
     def get_transport_icon(self, transport_mode: str) -> str:
         return {
@@ -147,9 +154,18 @@ class BusArrivalDisplay:
                 if key in shown:
                     continue
 
-                time_str = self.format_time_display(scheduled, expected)
+                time_str, minutes = self.format_time_display(scheduled, expected)
+
+                # HARD FILTER: ignore far-future services
+                if minutes is None or minutes > MAX_MINUTES_AHEAD:
+                    continue
+
                 state = dep.get("state", "")
-                delay = " ⏱️" if state == "EXPECTEDATSTOP" else " ❌" if state == "CANCELLED" else ""
+                delay = (
+                    " ⏱️" if state == "EXPECTEDATSTOP"
+                    else " ❌" if state == "CANCELLED"
+                    else ""
+                )
 
                 print(
                     f"   🚌 Line {line_no:>4} → {destination:<25} {time_str:>8}{delay}"
@@ -177,7 +193,7 @@ def main():
     refresh_interval = int(os.getenv("REFRESH_INTERVAL", "60"))
 
     print("🚌 SL Bus Arrival Display Starting...")
-    print(f"Timezone locked to Europe/Stockholm")
+    print("Timezone locked to Europe/Stockholm")
     print(f"Monitoring sites: {site_ids}")
     print(f"Refresh interval: {refresh_interval} seconds")
 
