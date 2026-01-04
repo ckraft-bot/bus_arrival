@@ -140,7 +140,7 @@ class BusArrivalDisplay:
         """Display departures for all configured sites"""
         
         print("\n" + "="*80)
-        print(f"SL AVGÅNGAR - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"SL BUSS AVGÅNGAR - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("="*80 + "\n")
         
         for site_id in self.site_ids:
@@ -163,7 +163,7 @@ class BusArrivalDisplay:
             departures = departures_data['departures']
             
             if not departures:
-                print("   No departures in the next 30 minutes\n")
+                print("   No bus departures in the next 30 minutes\n")
                 continue
             
             # Group departures by line
@@ -178,6 +178,10 @@ class BusArrivalDisplay:
                 line = departure.get('line', {})
                 line_designation = line.get('designation', 'N/A')
                 transport_mode = line.get('transport_mode', 'BUS')
+                
+                # FILTER: Only show buses
+                if transport_mode != 'BUS':
+                    continue
                 
                 destination = departure.get('destination', 'Unknown')
                 scheduled = departure.get('scheduled', '')
@@ -201,6 +205,11 @@ class BusArrivalDisplay:
                     print(f"   {icon} Line {line_designation:>4} → {destination:<25} {display_time:>8}{delay_indicator}")
                     lines_shown.add(line_key)
                     count += 1
+            
+            # If no buses were shown after filtering
+            if count == 0:
+                print("   No bus departures found (other transport modes may be available)\n")
+                continue
             
             # Show stop deviations if any
             if 'stop_deviations' in departures_data and departures_data['stop_deviations']:
