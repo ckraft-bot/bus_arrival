@@ -1,4 +1,4 @@
-# SL Bus Arrival Display
+s# SL Bus Arrival Display
 
 A real-time public transport departure board for Stockholm's SL network, inspired by the [Singapore bus_arrival project](https://github.com/awesomelionel/singapore-bus-timing-edisplay).
 
@@ -6,7 +6,7 @@ This project displays real-time departure information from SL (Storstockholms Lo
 
 ## Features
 
-- 🚌 Real-time departure information for buses, metro, trains, trams, and ferries
+- 🚌 Real-time departure information for buses
 - 📍 Monitor multiple stops simultaneously  
 - ⏱️ Shows countdown timers (e.g., "5 min", "Nu")
 - ⚠️ Displays service disruptions and deviations
@@ -60,7 +60,7 @@ Visit the SL sites endpoint: https://transport.integration.sl.se/v1/sites
 
 ```bash
 # Site IDs to monitor (comma-separated)
-SITE_IDS=9193,9001
+SITE_IDS=9192,9001
 # Refresh interval in seconds (default: 60)
 REFRESH_INTERVAL=60
 ```
@@ -77,10 +77,10 @@ python3 app/main.py
 
 ```bash
 # Set site IDs directly
-SITE_IDS=9193,9001 python3 app/main.py
+SITE_IDS=9192,9001 python3 app/main.py
 
 # Or use environment variables
-export SITE_IDS=9193,9001
+export SITE_IDS=9192,9001
 export REFRESH_INTERVAL=30
 python3 app/main.py
 ```
@@ -89,24 +89,31 @@ python3 app/main.py
 
 ```
 ================================================================================
-SL AVGÅNGAR - 2025-01-04 14:30:00
+SL BUSS AVGÅNGAR - 2026-01-04 17:34:49
 ================================================================================
 
 📍 Slussen (Site ID: 9192)
 --------------------------------------------------------------------------------
-   🚇 Line   17 → Akalla                   3 min
-   🚇 Line   19 → Hagsätra                 5 min
-   🚌 Line   76 → Alvik                    7 min
-   🚌 Line    3 → Karolinska inst...      Nu
-
-   ⚠️  Deviations:
-      • Temporary speed restrictions on the green line
+   🚌 Line  71T → Henriksdalsviadukten            Nu
+   🚌 Line  410 → Ektorps centrum                 Nu
+   🚌 Line  444 → Västra Orminge               1 min
+   🚌 Line   57 → Hjorthagen                   1 min
+   🚌 Line   53 → Henriksdalsberget            2 min
+   🚌 Line  471 → Västra Orminge               3 min
+   🚌 Line   53 → Karolinska institutet        4 min
+   🚌 Line    2 → Sofia                        4 min
+   🚌 Line  422 → Gustavsberg Lugnet           5 min
+   🚌 Line  440 → Bullandö                     5 min
 
 📍 T-Centralen (Site ID: 9001)
 --------------------------------------------------------------------------------
-   🚇 Line   17 → Akalla                   1 min
-   🚇 Line   18 → Alvik                    2 min
-   🚇 Line   19 → Hässelby strand          4 min
+   🚌 Line   65 → Skeppsholmen                    Nu
+   🚌 Line   69 → Djurgårdsbrunn              11 min
+   🚌 Line   69 → Centralen                   13 min
+   🚌 Line   65 → Hornsberg                   20 min
+
+   ⚠️  Deviations:
+      • Korta tåg. Gå mot mitten av plattformen.
 ```
 
 ## API Information
@@ -152,7 +159,7 @@ To run this automatically at startup on Linux systems:
    StandardError=inherit
    Restart=always
    User=pi
-   Environment="SITE_IDS=9193,9001"
+   Environment="SITE_IDS=9192,9001"
 
    [Install]
    WantedBy=multi-user.target
@@ -195,7 +202,7 @@ This Swedish version differs from the original Singapore project:
 
 - ✅ **No API key needed** - SL Transport API is freely accessible
 - Uses SL's Transport API instead of Singapore's LTA DataMall
-- 🚇 Supports multiple transport modes (metro, bus, train, tram, ferry)
+- 🚇 Supports multiple transport modes (metro, bus, train, tram, ferry) but this program will filter to only buses
 - 📍 Uses Site IDs instead of bus stop codes
 - ⏱️ Real-time countdown in minutes
 - ⚠️ Displays service disruptions
