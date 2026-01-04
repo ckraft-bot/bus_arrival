@@ -81,8 +81,8 @@ st.set_page_config(layout="centered")
 st.title("Bus Arrival Simulator")
 
 LTA_API_KEY = os.getenv("LTA_API_KEY")
-STOP_A = os.getenv("BUS_STOP_CODE_A")
-STOP_B = os.getenv("BUS_STOP_CODE_B")
+STOP_A = os.getenv("BUS_STOP_CODE_A") # High St Ctr near Boat Quay
+STOP_B = os.getenv("BUS_STOP_CODE_B") # Blk 18 in Tiong Bahru district
 
 refresh_rate = st.sidebar.slider("Refresh Interval (seconds)", 10, 120, 30)
 

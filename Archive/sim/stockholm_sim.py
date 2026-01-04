@@ -43,6 +43,10 @@ def get_sl_departures(site_id, forecast=30):
             line_designation = line.get("designation", "?")
             transport_mode = line.get("transport_mode", "BUS")
             
+            # FILTER: Only include buses
+            if transport_mode != "BUS":
+                continue
+            
             scheduled = dep.get("scheduled", "")
             expected = dep.get("expected") or scheduled
             
@@ -201,7 +205,7 @@ def draw_bus_screen(departures_A, departures_B, site_name_A, site_name_B):
 # -----------------------------
 st.set_page_config(layout="centered", page_title="SL Departure Simulator")
 
-st.title("🚇 SL Departure Board Simulator")
+st.title("🚌 SL Bus Arrival Simulator")
 
 # Get site IDs from hardcoded configuration
 site_ids = [int(x.strip()) for x in SITE_IDS.split(",")]
@@ -227,7 +231,7 @@ st.sidebar.write(f"**Left:** {site_name_A} ({SITE_A})")
 st.sidebar.write(f"**Right:** {site_name_B} ({SITE_B})")
 
 # Info message
-st.info("📱 This simulates an e-ink display showing real-time SL departures. "
+st.info("🚌 This simulates an e-ink display showing real-time SL **bus departures only**. "
         f"Currently showing: {site_name_A} and {site_name_B}. "
         "Edit SITE_IDS in the script to change sites.")
 
